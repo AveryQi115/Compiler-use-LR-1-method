@@ -48,6 +48,7 @@ std::set<std::string> Syntactic::_getProdFirstSet(const std::vector<std::string>
     return first;
 }
 
+//从grammer文件中生成grams记录左式和右式分别应该是什么
 bool Syntactic::_genProd(const std::string path)
 {
     std::ifstream gram_r_hd;
@@ -102,6 +103,7 @@ bool Syntactic::_genProd(const std::string path)
                 break;
             }
 
+
             right.push_back(gram_str.substr(0, right_pos));
 
             std::vector<std::string> split_prod = splitStr(gram_str.substr(0, right_pos), " ");
@@ -142,6 +144,7 @@ void Syntactic::_genFirstSet()
         _follow_map.insert({iter->left, std::set<std::string>{}});
         if (iter->right[0] == "$")
         {
+            // 如果只能推到结尾字符'$'
             if (_first_map[iter->left].find("$") == _first_map[iter->left].end())
             {
                 _first_map[iter->left].insert("$");
@@ -160,7 +163,7 @@ void Syntactic::_genFirstSet()
                 {
                     break;
                 }
-
+                // 如果iter2是终结符
                 if (!_isNonTerminalSym(*iter2))
                 {
                     if (_first_map[iter1->left].find(*iter2) == _first_map[iter1->left].end())
@@ -171,6 +174,7 @@ void Syntactic::_genFirstSet()
                     break;
                 }
 
+                // 如果iter2是非终结符，继续往下找first_map里面的iter3
                 for (auto iter3 = _first_map[*iter2].begin(); iter3 != _first_map[*iter2].end(); ++iter3)
                 {
                     if ((*iter3) != "$" && _first_map[iter1->left].find(*iter3) == _first_map[iter1->left].end())
@@ -203,7 +207,7 @@ void Syntactic::_genFirstSet()
 
 void Syntactic::_genFollowSet()
 {
-
+    //
     _follow_map[_prods[0].left].insert("#");
 
     while (true)
@@ -277,136 +281,269 @@ void Syntactic::_genLRItems()
     return;
 }
 
-std::set<LRItem> Syntactic::_genItemClosureSet(const LRItem &input_item)
+std::set<LRforward> Syntactic::_genItemClosureSet(LRforward &input_item)
 {
-    std::vector<LRItem> item_stack;
-    item_stack.push_back(input_item);
-    std::set<LRItem> item_set;
+    std::vector<LRforward> item_forward_stack;
+    item_forward_stack.push_back(input_item);
+    std::set<LRforward> item_forward_set;
 
-    while (!item_stack.empty())
+    while (!item_forward_stack.empty())
     {
+        //取得的item一定是算好了forward的
+        LRforward item_forward = item_forward_stack[item_forward_stack.size() - 1];
+        //TODO: 检查是否指针为空
+        LRItem item = *(item_forward.LRpointer);
+        item_forward_stack.pop_back();
 
-        LRItem item = item_stack[item_stack.size() - 1];
-        item_stack.pop_back();
+        item_forward_set.insert(item_forward);
 
-        item_set.insert(item);
-
+        //空串continue
         if (-1 == item.dot_pos)
         {
             continue;
         }
 
+        //规约continue
         if (item.dot_pos == _prods[item.prod_id].right.size())
         {
             continue;
         }
 
+        //终结符continue
         if (!_isNonTerminalSym(_prods[item.prod_id].right[item.dot_pos]))
         {
             continue;
         }
 
+        //非终结符
         std::string cur_sym = _prods[item.prod_id].right[item.dot_pos];
 
         for (auto iter = _lr_items.begin(); iter != _lr_items.end(); ++iter)
         {
-
+            //查找对应该非终结符的lr_item且该lr_item的点位在第一个或者该lr_item产生空串
             if (_prods[iter->prod_id].left == cur_sym && (iter->dot_pos == 0 || iter->dot_pos == -1))
             {
-                if (item_set.find(*iter) == item_set.end())
-                {
-                    item_stack.push_back(*iter);
+                LRforward next_forward;
+                next_forward.LRpointer = &(*iter);
+                bool needed_last_forward = true;
+                //iter2:当前产生式的下一个字符位置
+                for (auto iter2 = item.dot_pos+1; iter2 < _prods[item.prod_id].right.size(); iter2++) {
+                    //终结符：将该终结符作为展望,break
+                    std::string cur = _prods[item.prod_id].right[iter2];
+                    if (!_isNonTerminalSym(cur)) {
+                        next_forward.forward.insert(cur);
+                        needed_last_forward = false;
+                        break;
+                    }
+                    //非终结符且非空,该非终结符的first集全部并break
+                    //非终结符且可空，该非终结符的first集全部并continue
+                    else{
+                        next_forward.forward.insert(_first_map[cur].begin(), _first_map[cur].end());
+                        if (_first_map[cur].find("$") == _first_map[cur].end()) {
+                            needed_last_forward = false;
+                            break;
+                        }
+                        else
+                            continue;
+                    } 
+                }
+                if (needed_last_forward) {
+                    next_forward.forward.insert(item_forward.forward.begin(), item_forward.forward.end());
+                }
+
+                //item_forward_set中没有该item
+                std::set<LRforward>::iterator target;
+                bool append = false;
+                bool same = false;
+                auto iter1 = item_forward_set.begin();
+                for (iter1 = item_forward_set.begin(); iter1 != item_forward_set.end(); iter1++) {
+                    if (iter1->LRpointer == next_forward.LRpointer && (iter1->forward < next_forward.forward || next_forward.forward < iter1->forward)) {
+                        target = iter1;
+                        append = true;
+                        break;
+                    }
+                    else if (iter1->LRpointer == next_forward.LRpointer) {
+                        target = iter1;
+                        same = true;
+                        break;
+                    }
+                }
+                if (append) {
+                    LRforward modified_forward = *target;
+                    item_forward_set.erase(target);
+                    modified_forward.forward.insert(next_forward.forward.begin(), next_forward.forward.end());
+                    item_forward_set.insert(modified_forward);
+                    item_forward_stack.push_back(modified_forward);
+                }
+                else if (same) {
+                    //不加到栈里
+                    //不加到set里
+                    continue;
+                }
+                else {
+                    item_forward_set.insert(next_forward);
+                    item_forward_stack.push_back(next_forward);
                 }
             }
         }
     }
 
-    return item_set;
+    return item_forward_set;
 }
 
-std::set<LRItem> Syntactic::_genItemsClosureSet(const std::set<LRItem> &items)
+std::set<LRforward> Syntactic::_genItemsClosureSet(std::set<LRforward> &items_forward)
 {
-    std::vector<LRItem> item_stack;
-    for (auto iter = items.begin(); iter != items.end(); ++iter)
-        item_stack.push_back(*iter);
+    std::vector<LRforward> item_forward_stack;
+    for (auto iter = items_forward.begin(); iter != items_forward.end(); ++iter)
+        item_forward_stack.push_back(*iter);
 
-    std::set<LRItem> item_set;
+    std::set<LRforward> item_forward_set;
 
-    while (!item_stack.empty())
+    while (!item_forward_stack.empty())
     {
+        //取得的item一定是算好了forward的
+        LRforward item_forward = item_forward_stack[item_forward_stack.size() - 1];
+        //TODO: 检查是否指针为空
+        LRItem item = *(item_forward.LRpointer);
+        item_forward_stack.pop_back();
 
-        LRItem item = item_stack[item_stack.size() - 1];
-        item_stack.pop_back();
+        item_forward_set.insert(item_forward);
 
-        item_set.insert(item);
-
+        //空串continue
         if (-1 == item.dot_pos)
         {
             continue;
         }
 
+        //规约continue
         if (item.dot_pos == _prods[item.prod_id].right.size())
         {
             continue;
         }
 
+        //终结符continue
         if (!_isNonTerminalSym(_prods[item.prod_id].right[item.dot_pos]))
         {
             continue;
         }
 
+        //当前非终结符；接下来的循环找当前的非终结符出现在左边的式子
         std::string cur_sym = _prods[item.prod_id].right[item.dot_pos];
 
         for (auto iter = _lr_items.begin(); iter != _lr_items.end(); ++iter)
         {
-
+            //查找对应该非终结符的lr_item且该lr_item的点位在第一个或者该lr_item产生空串
             if (_prods[iter->prod_id].left == cur_sym && (iter->dot_pos == 0 || iter->dot_pos == -1))
             {
-                if (item_set.find(*iter) == item_set.end())
-                {
-                    item_stack.push_back(*iter);
+                LRforward next_forward;
+                next_forward.LRpointer = &(*iter);
+                bool needed_last_forward = true;
+                //iter2:当前产生式的下一个字符位置
+                for (auto iter2 = item.dot_pos + 1; iter2 < _prods[item.prod_id].right.size(); iter2++) {
+                    //终结符：将该终结符作为展望,break
+                    std::string cur = _prods[item.prod_id].right[iter2];
+                    if (!_isNonTerminalSym(cur)) {
+                        next_forward.forward.insert(cur);
+                        needed_last_forward = false;
+                        break;
+                    }
+                    //非终结符且非空,该非终结符的first集全部并break
+                    //非终结符且可空，该非终结符的first集全部并continue
+                    else {
+                        next_forward.forward.insert(_first_map[cur].begin(), _first_map[cur].end());
+                        if (_first_map[cur].find("$") == _first_map[cur].end()) {
+                            needed_last_forward = false;
+                            break;
+                        }
+                        else
+                            continue;
+                    }
+                }
+                if (needed_last_forward) {
+                    next_forward.forward.insert(item_forward.forward.begin(), item_forward.forward.end());
+                }
+
+                //item_forward_set中没有该item
+                std::set<LRforward>::iterator target;
+                bool append = false;
+                bool same = false;
+                auto iter1 = item_forward_set.begin();
+                for (iter1 = item_forward_set.begin(); iter1 != item_forward_set.end(); iter1++) {
+                    if (iter1->LRpointer == next_forward.LRpointer && (iter1->forward < next_forward.forward || next_forward.forward < iter1->forward)) {
+                        target = iter1;
+                        append = true;
+                        break;
+                    }
+                    else if (iter1->LRpointer == next_forward.LRpointer) {
+                        target = iter1;
+                        same = true;
+                        break;
+                    }
+                }
+                if (append) {
+                    LRforward modified_forward = *target;
+                    item_forward_set.erase(target);
+                    modified_forward.forward.insert(next_forward.forward.begin(), next_forward.forward.end());
+                    item_forward_set.insert(modified_forward);
+                    item_forward_stack.push_back(modified_forward);
+                }
+                else if (same) {
+                    //不加到栈里
+                    //不加到set里
+                    continue;
+                }
+                else {
+                    item_forward_set.insert(next_forward);
+                    item_forward_stack.push_back(next_forward);
                 }
             }
         }
     }
-
-    return item_set;
+    return item_forward_set;
 }
 
 bool Syntactic::_genNormalFamilySet()
 {
+    //it
+    std::vector<std::set<LRforward>> item_stack;
 
-    std::vector<std::set<LRItem>> item_stack;
-    item_stack.push_back(_genItemClosureSet(*_lr_items.begin()));
+    LRforward first;
+    if (_prods[_lr_items.begin()->prod_id].left == "Start") {
+        first.LRpointer = &(*_lr_items.begin());
+        first.forward.insert("#");
+    }
+
+    item_stack.push_back(_genItemClosureSet(first));
     _norm_families.push_back(item_stack[0]);
 
     while (!item_stack.empty())
     {
-
-        std::set<LRItem> item = item_stack[item_stack.size() - 1];
+        std::set<LRforward> item = item_stack[item_stack.size() - 1];
         item_stack.pop_back();
 
         int cur_state = find(_norm_families.begin(), _norm_families.end(), item) - _norm_families.begin();
 
+        //在当前的闭包item中遍历表达式
         for (auto iter1 = item.begin(); iter1 != item.end(); ++iter1)
         {
-
-            if (-1 == iter1->dot_pos || (_prods[iter1->prod_id].right.size() == iter1->dot_pos))
+            const LRItem* lr_item = iter1->LRpointer;
+            //如果该表达式是空串或规约
+            if (-1 == lr_item->dot_pos || (_prods[lr_item->prod_id].right.size() == lr_item->dot_pos))
             {
+                //sym: 表达式左部
+                std::string sym = _prods[lr_item->prod_id].left;
 
-                std::string sym = _prods[iter1->prod_id].left;
-
-                for (auto iter2 = _follow_map[sym].begin(); iter2 != _follow_map[sym].end(); ++iter2)
+                //遍历表达式iter1的展望，并按照展望规约
+                for (auto iter2 = iter1->forward.begin(); iter2 != iter1->forward.end(); ++iter2)
                 {
 
                     if (_action_goto_map.find({cur_state, *iter2}) == _action_goto_map.end())
                     {
-                        _action_goto_map.insert({{cur_state, *iter2}, {CONCLUDE, iter1->prod_id}});
+                        _action_goto_map.insert({{cur_state, *iter2}, {CONCLUDE, lr_item->prod_id}});
                     }
                     else
                     {
-
-                        if (!(_action_goto_map[{cur_state, *iter2}] == SLROp{CONCLUDE, iter1->prod_id}))
+                        if (!(_action_goto_map[{cur_state, *iter2}] == SLROp{CONCLUDE, lr_item->prod_id}))
                         {
                             _printSLRError(item);
                             return false;
@@ -414,28 +551,34 @@ bool Syntactic::_genNormalFamilySet()
                     }
                 }
             }
+            //如果表达式iter1是移进
             else
             {
-
-                std::string cur_right_sym = _prods[iter1->prod_id].right[iter1->dot_pos];
-
+                std::string cur_right_sym = _prods[lr_item->prod_id].right[lr_item->dot_pos];
+                
                 std::set<LRItem> items;
+                std::set<LRforward> items_forward;
+                //item是LRforward集
                 for (auto iter2 = item.begin(); iter2 != item.end(); ++iter2)
                 {
-
-                    if (iter2->dot_pos == -1 || (iter2->dot_pos == _prods[iter2->prod_id].right.size()))
+                    const LRItem* lr_item2 = iter2->LRpointer;
+                    if (lr_item2->dot_pos == -1 || (lr_item2->dot_pos == _prods[lr_item2->prod_id].right.size()))
                     {
                         continue;
                     }
 
-                    if (_prods[iter1->prod_id].right[iter1->dot_pos] ==
-                        _prods[iter2->prod_id].right[iter2->dot_pos])
+                    //如果点后的是同一个非终结符或终结符，将他们加入到items中
+                    if (_prods[lr_item->prod_id].right[lr_item->dot_pos] ==
+                        _prods[lr_item2->prod_id].right[lr_item2->dot_pos])
                     {
-                        items.insert({iter2->prod_id, iter2->dot_pos + 1});
+                        std::set<LRItem>::iterator item_pointer = find(_lr_items.begin(), _lr_items.end(), LRItem{ lr_item2->prod_id,lr_item2->dot_pos + 1 });
+                        items.insert(*item_pointer);
+                        items_forward.insert({ &(*item_pointer),iter2->forward });
                     }
                 }
-                std::set<LRItem> next_normal_family = _genItemsClosureSet(items);
+                std::set<LRforward> next_normal_family = _genItemsClosureSet(items_forward);
 
+                //全等
                 if (find(_norm_families.begin(), _norm_families.end(), next_normal_family) == _norm_families.end())
                 {
                     _norm_families.push_back(next_normal_family);
@@ -462,12 +605,15 @@ bool Syntactic::_genNormalFamilySet()
 
     for (auto iter1 = _norm_families.begin(); iter1 != _norm_families.end(); ++iter1)
     {
-        for (auto iter2 = iter1->begin(); iter2 != iter1->end(); ++iter2)
-            if (LRItem(0, 1) == *iter2)
+        for (auto iter2 = iter1->begin(); iter2 != iter1->end(); ++iter2) {
+            const LRItem* iter2_item = iter2->LRpointer;
+            if (LRItem(0, 1) == *iter2_item)
             {
                 cur_state2 = iter1 - _norm_families.begin();
                 break;
             }
+        }
+
         if (cur_state2 >= 0)
             break;
     }
@@ -480,10 +626,18 @@ bool Syntactic::_genNormalFamilySet()
 
 bool Syntactic::_buildGram()
 {
+    //生成转移集
     _genProd();
+    //添加头的
     _genAugGram();
+
+    //
     _genFirstSet();
+
+    //
     _genFollowSet();
+
+
     _genGramSymSet();
     _genLRItems();
     return _genNormalFamilySet();
@@ -642,31 +796,32 @@ void Syntactic::_printLRItems(const std::string path)
 void Syntactic::_printClosure()
 {
     std::cout << "Closure项目：" << std::endl;
-    for (auto iter = _lr_items.begin(); iter != _lr_items.end(); ++iter)
+    for (auto iter = _norm_families.begin(); iter != _norm_families.end(); ++iter)
     {
-        std::set<LRItem> lr = _genItemClosureSet(*iter);
+        std::set<LRforward> lr = *iter;
 
         for (auto iter1 = lr.begin(); iter1 != lr.end(); ++iter1)
         {
-            std::cout << _prods[iter1->prod_id].left << "->";
+            const LRItem* iter_item1 = iter1->LRpointer;
+            std::cout << _prods[iter_item1->prod_id].left << "->";
 
-            if (-1 == iter1->dot_pos)
+            if (-1 == iter_item1->dot_pos)
             {
                 std::cout << "·" << std::endl;
                 continue;
             }
 
-            int prod_len = _prods[iter1->prod_id].right.size();
+            int prod_len = _prods[iter_item1->prod_id].right.size();
 
-            for (auto iter2 = _prods[iter1->prod_id].right.begin();
-                 iter2 != _prods[iter1->prod_id].right.end(); iter2++)
+            for (auto iter2 = _prods[iter_item1->prod_id].right.begin();
+                 iter2 != _prods[iter_item1->prod_id].right.end(); iter2++)
             {
-                if (iter1->dot_pos == (iter2 - _prods[iter1->prod_id].right.begin()))
+                if (iter_item1->dot_pos == (iter2 - _prods[iter_item1->prod_id].right.begin()))
                     std::cout << "· ";
                 std::cout << *iter2 << " ";
 
-                if (iter1->dot_pos == prod_len &&
-                    (_prods[iter1->prod_id].right.end() - iter2 == 1))
+                if (iter_item1->dot_pos == prod_len &&
+                    (_prods[iter_item1->prod_id].right.end() - iter2 == 1))
                     std::cout << "·";
             }
             std::cout << std::endl;
@@ -675,13 +830,14 @@ void Syntactic::_printClosure()
     }
 }
 
-void Syntactic::_printSLRError(const std::set<LRItem> &normal_family)
+void Syntactic::_printSLRError(const std::set<LRforward> &normal_family)
 {
     std::cerr << "不是SLR文法！！！ 冲突项目的规范族：" << std::endl;
-    std::set<LRItem> lr = normal_family;
+    std::set<LRforward> lr = normal_family;
 
-    for (auto iter1 = lr.begin(); iter1 != lr.end(); ++iter1)
+    for (auto iter = lr.begin(); iter != lr.end(); ++iter)
     {
+        const LRItem* iter1 = iter->LRpointer;
         std::cerr << _prods[iter1->prod_id].left << "->";
 
         if (-1 == iter1->dot_pos)
@@ -723,27 +879,31 @@ void Syntactic::_printNormFamiliySet(const std::string path)
         w_hd << "规范族 " << iter1 - _norm_families.begin() << " : " << std::endl;
         for (auto iter2 = iter1->begin(); iter2 != iter1->end(); ++iter2)
         {
+            const LRItem* iter_item2 = iter2->LRpointer;
+            w_hd << _prods[iter_item2->prod_id].left << "->";
 
-            w_hd << _prods[iter2->prod_id].left << "->";
-
-            if (-1 == iter2->dot_pos)
+            if (-1 == iter_item2->dot_pos)
             {
                 w_hd << "·" << std::endl;
                 continue;
             }
 
-            int prod_len = _prods[iter2->prod_id].right.size();
+            int prod_len = _prods[iter_item2->prod_id].right.size();
 
-            for (auto iter3 = _prods[iter2->prod_id].right.begin();
-                 iter3 != _prods[iter2->prod_id].right.end(); iter3++)
+            for (auto iter3 = _prods[iter_item2->prod_id].right.begin();
+                 iter3 != _prods[iter_item2->prod_id].right.end(); iter3++)
             {
-                if (iter2->dot_pos == (iter3 - _prods[iter2->prod_id].right.begin()))
+                if (iter_item2->dot_pos == (iter3 - _prods[iter_item2->prod_id].right.begin()))
                     w_hd << "· ";
                 w_hd << *iter3 << " ";
 
-                if (iter2->dot_pos == prod_len &&
-                    (_prods[iter2->prod_id].right.end() - iter3 == 1))
+                if (iter_item2->dot_pos == prod_len &&
+                    (_prods[iter_item2->prod_id].right.end() - iter3 == 1))
                     w_hd << "·";
+            }
+            w_hd << " ";
+            for (auto iter_forward = iter2->forward.begin(); iter_forward != iter2->forward.end(); iter_forward++) {
+                w_hd << *iter_forward<<"|";
             }
             w_hd << std::endl;
         }
@@ -928,6 +1088,28 @@ Syntactic::~Syntactic()
         _syntactic_w_hd.close();
 }
 
+bool LRforward::operator==(const LRforward& item) const
+{
+    if (this->LRpointer != item.LRpointer)
+        return false;
+
+    for (auto iter = item.forward.begin(); iter != item.forward.end(); iter++) {
+        if (find(this->forward.begin(), this->forward.end(), *iter) == this->forward.end())
+            return false;
+    }
+    return true;
+}
+
+bool LRforward::operator<(const LRforward& item) const
+{
+    if (this->LRpointer != item.LRpointer)
+        return this->LRpointer<item.LRpointer;
+    if (this->forward < item.forward)
+        return true;
+    else
+        return false;
+}
+
 bool LRItem::operator==(const LRItem &item) const
 {
     return (this->prod_id == item.prod_id) && (this->dot_pos == item.dot_pos);
@@ -943,13 +1125,34 @@ bool SLROp::operator==(const SLROp &operation) const
     return (this->op == operation.op) && (this->state == operation.state);
 }
 
+//code_path: 待编译程序
+//skip_parse: 跳过语法分析
 bool Syntactic::analyze(const std::string code_path, bool skip_parse)
 {
+    //状态栈
+    //std::vector<int> _state_stack
     _state_stack.push_back(0);
+    
+    //不知道什么栈
     _move_con_stack.push_back("#");
 
+    //std::vector<GramSym> _gram_sym_stack
+    //GramSym
+    //struct GramSym
+    // {
+    //     std::string sym_name;
+    //     std::string txt_val;
+    //     SymPos pos;
+    //     std::string op;
+    // };
+    //struct SymPos
+    // {
+    //     int table_pos;
+    //     int sym_pos;
+    // };
     _gram_sym_stack.push_back({"Program"});
 
+    // 词法分析器的结果
     Tokenizer tokenizer;
     if (!tokenizer.isReady(code_path, true))
         return false;
@@ -957,8 +1160,9 @@ bool Syntactic::analyze(const std::string code_path, bool skip_parse)
     int sytactic_step = 0;
     while (true)
     {
-
+        // 读入word
         Word get_word = tokenizer.getWord();
+
         std::string word_string = get_word.word_string;
         if (get_word.type == LUNKNOWN)
         {
@@ -978,9 +1182,10 @@ bool Syntactic::analyze(const std::string code_path, bool skip_parse)
 
         while (true)
         {
-
+            // 当前状态是状态栈的栈顶
             int cur_state = _state_stack[_state_stack.size() - 1];
 
+            // std::map<std::pair<int, std::string>, SLROp> _action_goto_map
             if (_action_goto_map.find({cur_state, word_string}) == _action_goto_map.end())
             {
                 std::cerr << "语法分析器过程中，发生错误！" << std::endl;
@@ -995,6 +1200,7 @@ bool Syntactic::analyze(const std::string code_path, bool skip_parse)
                 _move_con_stack.push_back(word_string);
                 _printProcess(sytactic_step, _action_goto_map[{cur_state, word_string}]);
                 sytactic_step++;
+                //语义分析用
                 _gram_sym_stack.push_back({get_word.word_string, get_word.val});
 
                 break;

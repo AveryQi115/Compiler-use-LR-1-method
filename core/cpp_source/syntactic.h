@@ -15,13 +15,20 @@ struct SLROp
     bool operator ==(const SLROp &operation) const;
 };
 
-
 struct LRItem {
     int prod_id;
     int dot_pos;
     LRItem(int item_num, int point_num) { this->prod_id = item_num, this->dot_pos = point_num; };
     bool operator ==(const LRItem &item) const;
     bool operator <(const LRItem &item) const;
+};
+
+struct LRforward {
+    const LRItem* LRpointer;
+    std::set<std::string> forward;
+    //LRforward(const LRItem* LRpointer,std::set<std::string> forward) { this->LRpointer = LRpointer, this->forward = forward; };
+    bool operator ==(const LRforward& item) const;
+    bool operator <(const LRforward& item) const;
 };
 
 class Syntactic {
@@ -31,7 +38,7 @@ private:
     std::vector<Prod> _prods;
     std::set<std::string> _gram_sym;
     std::map<std::string, std::set<std::string>> _first_map, _follow_map;
-    std::vector<std::set<LRItem>> _norm_families;
+    std::vector<std::set<LRforward>> _norm_families;
     std::set<LRItem> _lr_items;
     std::map<std::pair<int, std::string>, SLROp> _action_goto_map;
     std::ofstream _syntactic_w_hd;
@@ -50,10 +57,9 @@ private:
     bool _genNormalFamilySet();
     void _genLRItems();
     bool _buildGram();
-    std::set<LRItem> _genItemClosureSet(const LRItem &);
-    std::set<LRItem> _genItemsClosureSet(const std::set<LRItem> &);
+    std::set<LRforward> _genItemClosureSet(LRforward &);
+    std::set<LRforward> _genItemsClosureSet(std::set<LRforward> &);
     std::set<std::string> _getProdFirstSet(const std::vector<std::string> &);
-
 
     void _print_buildGramDetails();
     void _printProds(const std::string path = path::syntatic::PRODS_PATH);
@@ -63,7 +69,7 @@ private:
     void _printGramSymSet(const std::string path = path::syntatic::GRAMSYM_PATH);
     void _printLRItems(const std::string path = path::syntatic::LRITEM_PATH);
     void _printClosure();
-    void _printSLRError(const std::set<LRItem> &);
+    void _printSLRError(const std::set<LRforward> &);
     void _printNormFamiliySet(const std::string path = path::syntatic::NORMFAMILY_PATH);
     void _printActionGoto(const std::string path = path::syntatic::TABLE_PATH);
 

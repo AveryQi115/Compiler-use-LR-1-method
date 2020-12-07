@@ -13,7 +13,7 @@ int main(int argc, char** argv)
         skip_parse = true;
     }
 
-    std::string file_name = "./core/in/tmp.txt";
+    std::string file_name = "./in/tmp.txt";
     Syntactic sa;
     sa.analyze(file_name, skip_parse = skip_parse);
     return 0;
