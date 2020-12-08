@@ -53,7 +53,7 @@ class TkMain(tk.Tk):
     def _symbolTable(self):
         self._genTmpFile()
 
-        p = subprocess.Popen(['./core/compile.exe', '-l'],
+        p = subprocess.Popen(['./Compiler.exe', '-l'],
                              stdin=subprocess.PIPE,
                              stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE)
@@ -69,7 +69,7 @@ class TkMain(tk.Tk):
     def _IR(self):
         self._genTmpFile()
 
-        p = subprocess.Popen(['./core/compile.exe'],
+        p = subprocess.Popen(['./Compiler.exe'],
                              stdin=subprocess.PIPE,
                              stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE)
@@ -85,7 +85,7 @@ class TkMain(tk.Tk):
             self.wait_window(symbol_tabel_popup)
             self.wait_window(ir_popup)
 
-    def _genTmpFile(self, path='core/in/tmp.txt'):
+    def _genTmpFile(self, path='./core/in/tmp.txt'):
         with open(path, mode='w') as file:
             file.write(self.code_input.get("1.0", tk.END).rstrip('\n'))
 

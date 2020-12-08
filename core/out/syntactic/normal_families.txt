@@ -1,26 +1,26 @@
 项目集规范族：
 规范族 0 : 
 Start->· Program  #|
-Stmt_string->· Stmt_loop Stmt  #|
 Program->· Stmt_string  #|
-Stmt_loop->· Stmt_loop Stmt  int|void|
 Stmt_loop->·
+Stmt_string->· Stmt_loop Stmt  #|
+Stmt_loop->· Stmt_loop Stmt  int|void|
 
 规范族 1 : 
 Start->Program · #|
 
 规范族 2 : 
-Stmt_string->Stmt_loop · Stmt  #|
-Stmt_loop->Stmt_loop · Stmt  int|void|
-Stmt->· int identifier Stmt_type  #|int|void|
-Stmt->· void identifier Create_Function_table Function_stmt  #|int|void|
-
-规范族 3 : 
 Program->Stmt_string · #|
 
+规范族 3 : 
+Stmt_loop->Stmt_loop · Stmt  int|void|
+Stmt->· int identifier Stmt_type  #|int|void|
+Stmt_string->Stmt_loop · Stmt  #|
+Stmt->· void identifier Create_Function_table Function_stmt  #|int|void|
+
 规范族 4 : 
-Stmt_string->Stmt_loop Stmt · #|
 Stmt_loop->Stmt_loop Stmt · int|void|
+Stmt_string->Stmt_loop Stmt · #|
 
 规范族 5 : 
 Stmt->int · identifier Stmt_type  #|int|void|
@@ -29,8 +29,8 @@ Stmt->int · identifier Stmt_type  #|int|void|
 Stmt->void · identifier Create_Function_table Function_stmt  #|int|void|
 
 规范族 7 : 
-Create_Function_table->·
 Stmt->void identifier · Create_Function_table Function_stmt  #|int|void|
+Create_Function_table->·
 
 规范族 8 : 
 Stmt->void identifier Create_Function_table · Function_stmt  #|int|void|
@@ -40,84 +40,84 @@ Function_stmt->· ( Formal_parameter ) Sentence_block Exit_Function_table  #|int
 Stmt->void identifier Create_Function_table Function_stmt · #|int|void|
 
 规范族 10 : 
-Formal_parameter->· Formal_parameter_list  )|
 Formal_parameter->· void  )|
 Formal_parameter->·
-Formal_parameter_list->· Parameter_loop Parameter  )|
 Parameter_loop->· Parameter_loop Parameter ,  int|
-Function_stmt->( · Formal_parameter ) Sentence_block Exit_Function_table  #|int|void|
+Formal_parameter_list->· Parameter_loop Parameter  )|
 Parameter_loop->·
+Function_stmt->( · Formal_parameter ) Sentence_block Exit_Function_table  #|int|void|
+Formal_parameter->· Formal_parameter_list  )|
 
 规范族 11 : 
-Formal_parameter->Formal_parameter_list · )|
-
-规范族 12 : 
 Formal_parameter->void · )|
 
-规范族 13 : 
+规范族 12 : 
+Parameter->· int identifier  )|,|
 Formal_parameter_list->Parameter_loop · Parameter  )|
 Parameter_loop->Parameter_loop · Parameter ,  int|
-Parameter->· int identifier  )|,|
 
-规范族 14 : 
+规范族 13 : 
 Function_stmt->( Formal_parameter · ) Sentence_block Exit_Function_table  #|int|void|
 
+规范族 14 : 
+Formal_parameter->Formal_parameter_list · )|
+
 规范族 15 : 
-Function_stmt->( Formal_parameter ) · Sentence_block Exit_Function_table  #|int|void|
 Sentence_block_m->·
 Sentence_block->· Sentence_block_m { Internal_stmt Sentence_string }  #|$|int|void|
+Function_stmt->( Formal_parameter ) · Sentence_block Exit_Function_table  #|int|void|
 
 规范族 16 : 
-Exit_Function_table->·
-Function_stmt->( Formal_parameter ) Sentence_block · Exit_Function_table  #|int|void|
-
-规范族 17 : 
 Sentence_block->Sentence_block_m · { Internal_stmt Sentence_string }  #|$|int|void|
 
+规范族 17 : 
+Function_stmt->( Formal_parameter ) Sentence_block · Exit_Function_table  #|int|void|
+Exit_Function_table->·
+
 规范族 18 : 
-Internal_variable_stmt->· int identifier  ;|
-Sentence_block->Sentence_block_m { · Internal_stmt Sentence_string }  #|$|int|void|
-Internal_stmt->·
-Internal_stmt->· Internal_variable_stmt ; Internal_stmt  identifier|if|return|while|
+Function_stmt->( Formal_parameter ) Sentence_block Exit_Function_table · #|int|void|
 
 规范族 19 : 
-Internal_variable_stmt->int · identifier  ;|
+Internal_variable_stmt->· int identifier  ;|
+Sentence_block->Sentence_block_m { · Internal_stmt Sentence_string }  #|$|int|void|
+Internal_stmt->· Internal_variable_stmt ; Internal_stmt  identifier|if|return|while|
+Internal_stmt->·
 
 规范族 20 : 
-Sentence_string->· Sentence_loop Sentence  }|
-Sentence_loop->· Sentence_loop Sentence  identifier|if|return|while|
-Sentence_block->Sentence_block_m { Internal_stmt · Sentence_string }  #|$|int|void|
-Sentence_loop->·
+Internal_variable_stmt->int · identifier  ;|
 
 规范族 21 : 
-Internal_stmt->Internal_variable_stmt · ; Internal_stmt  identifier|if|return|while|
+Sentence_block->Sentence_block_m { Internal_stmt · Sentence_string }  #|$|int|void|
+Sentence_string->· Sentence_loop Sentence  }|
+Sentence_loop->· Sentence_loop Sentence  identifier|if|return|while|
+Sentence_loop->·
 
 规范族 22 : 
-Internal_stmt->Internal_variable_stmt ; · Internal_stmt  identifier|if|return|while|
-Internal_variable_stmt->· int identifier  ;|
-Internal_stmt->·
-Internal_stmt->· Internal_variable_stmt ; Internal_stmt  identifier|if|return|while|
+Internal_stmt->Internal_variable_stmt · ; Internal_stmt  identifier|if|return|while|
 
 规范族 23 : 
-Internal_stmt->Internal_variable_stmt ; Internal_stmt · identifier|if|return|while|
+Internal_variable_stmt->· int identifier  ;|
+Internal_stmt->· Internal_variable_stmt ; Internal_stmt  identifier|if|return|while|
+Internal_stmt->Internal_variable_stmt ; · Internal_stmt  identifier|if|return|while|
+Internal_stmt->·
 
 规范族 24 : 
-Sentence_string->Sentence_loop · Sentence  }|
-While_sentence->· while While_sentence_m1 ( Expression ) While_sentence_m2 Sentence_block  identifier|if|return|while|}|
-Sentence->· If_sentence  identifier|if|return|while|}|
-Sentence->· While_sentence  identifier|if|return|while|}|
-Sentence_loop->Sentence_loop · Sentence  identifier|if|return|while|
-Return_sentence->· return Return_expression ;  identifier|if|return|while|}|
-Assign_sentence->· identifier = Expression ;  identifier|if|return|while|}|
-Sentence->· Assign_sentence  identifier|if|return|while|}|
-Sentence->· Return_sentence  identifier|if|return|while|}|
-If_sentence->· if If_sentence_m0 ( Expression ) If_sentence_m1 Sentence_block If_expression  identifier|if|return|while|}|
+Internal_stmt->Internal_variable_stmt ; Internal_stmt · identifier|if|return|while|
 
 规范族 25 : 
 Sentence_block->Sentence_block_m { Internal_stmt Sentence_string · }  #|$|int|void|
 
 规范族 26 : 
-Sentence_block->Sentence_block_m { Internal_stmt Sentence_string } · #|$|int|void|
+Sentence_string->Sentence_loop · Sentence  }|
+While_sentence->· while While_sentence_m1 ( Expression ) While_sentence_m2 Sentence_block  identifier|if|return|while|}|
+Sentence->· If_sentence  identifier|if|return|while|}|
+Sentence->· Assign_sentence  identifier|if|return|while|}|
+Sentence->· While_sentence  identifier|if|return|while|}|
+Assign_sentence->· identifier = Expression ;  identifier|if|return|while|}|
+Return_sentence->· return Return_expression ;  identifier|if|return|while|}|
+Sentence->· Return_sentence  identifier|if|return|while|}|
+Sentence_loop->Sentence_loop · Sentence  identifier|if|return|while|
+If_sentence->· if If_sentence_m0 ( Expression ) If_sentence_m1 Sentence_block If_expression  identifier|if|return|while|}|
 
 规范族 27 : 
 Sentence_string->Sentence_loop Sentence · }|
@@ -131,21 +131,21 @@ While_sentence_m1->·
 Sentence->If_sentence · identifier|if|return|while|}|
 
 规范族 30 : 
-Sentence->While_sentence · identifier|if|return|while|}|
+Sentence->Assign_sentence · identifier|if|return|while|}|
 
 规范族 31 : 
-Return_expression->· Expression  ;|
-Return_sentence->return · Return_expression ;  identifier|if|return|while|}|
-Return_expression->·
-Add_expression_loop->· Add_expression_loop Add_expression Relop  (|identifier|num|
-Expression->· Add_expression_loop Add_expression  ;|
-Add_expression_loop->·
+Sentence->While_sentence · identifier|if|return|while|}|
 
 规范族 32 : 
 Assign_sentence->identifier · = Expression ;  identifier|if|return|while|}|
 
 规范族 33 : 
-Sentence->Assign_sentence · identifier|if|return|while|}|
+Return_sentence->return · Return_expression ;  identifier|if|return|while|}|
+Return_expression->· Expression  ;|
+Return_expression->·
+Add_expression_loop->·
+Expression->· Add_expression_loop Add_expression  ;|
+Add_expression_loop->· Add_expression_loop Add_expression Relop  (|identifier|num|
 
 规范族 34 : 
 Sentence->Return_sentence · identifier|if|return|while|}|
@@ -158,10 +158,10 @@ If_sentence_m0->·
 If_sentence->if If_sentence_m0 · ( Expression ) If_sentence_m1 Sentence_block If_expression  identifier|if|return|while|}|
 
 规范族 37 : 
-If_sentence->if If_sentence_m0 ( · Expression ) If_sentence_m1 Sentence_block If_expression  identifier|if|return|while|}|
-Add_expression_loop->· Add_expression_loop Add_expression Relop  (|identifier|num|
-Expression->· Add_expression_loop Add_expression  )|
 Add_expression_loop->·
+If_sentence->if If_sentence_m0 ( · Expression ) If_sentence_m1 Sentence_block If_expression  identifier|if|return|while|}|
+Expression->· Add_expression_loop Add_expression  )|
+Add_expression_loop->· Add_expression_loop Add_expression Relop  (|identifier|num|
 
 规范族 38 : 
 If_sentence->if If_sentence_m0 ( Expression · ) If_sentence_m1 Sentence_block If_expression  identifier|if|return|while|}|
@@ -169,42 +169,42 @@ If_sentence->if If_sentence_m0 ( Expression · ) If_sentence_m1 Sentence_block I
 规范族 39 : 
 Expression->Add_expression_loop · Add_expression  )|
 Add_expression_loop->Add_expression_loop · Add_expression Relop  (|identifier|num|
-Item_loop->·
+Item_loop->· Item_loop Item +  (|identifier|num|
 Add_expression->· Item_loop Item  !=|)|<|<=|==|>|>=|
 Item_loop->· Item_loop Item -  (|identifier|num|
-Item_loop->· Item_loop Item +  (|identifier|num|
+Item_loop->·
 
 规范族 40 : 
 Expression->Add_expression_loop Add_expression · )|
-Add_expression_loop->Add_expression_loop Add_expression · Relop  (|identifier|num|
-Relop->· !=  (|identifier|num|
-Relop->· ==  (|identifier|num|
 Relop->· >  (|identifier|num|
 Relop->· >=  (|identifier|num|
 Relop->· <=  (|identifier|num|
 Relop->· <  (|identifier|num|
+Relop->· ==  (|identifier|num|
+Add_expression_loop->Add_expression_loop Add_expression · Relop  (|identifier|num|
+Relop->· !=  (|identifier|num|
 
 规范族 41 : 
-Add_expression->Item_loop · Item  !=|)|<|<=|==|>|>=|
+Factor_loop->·
 Item_loop->Item_loop · Item +  (|identifier|num|
+Factor_loop->· Factor_loop Factor *  (|identifier|num|
+Add_expression->Item_loop · Item  !=|)|<|<=|==|>|>=|
 Item_loop->Item_loop · Item -  (|identifier|num|
 Item->· Factor_loop Factor  !=|)|+|-|<|<=|==|>|>=|
-Factor_loop->·
-Factor_loop->· Factor_loop Factor *  (|identifier|num|
 Factor_loop->· Factor_loop Factor /  (|identifier|num|
 
 规范族 42 : 
+Add_expression->Item_loop Item · !=|)|<|<=|==|>|>=|
 Item_loop->Item_loop Item · +  (|identifier|num|
 Item_loop->Item_loop Item · -  (|identifier|num|
-Add_expression->Item_loop Item · !=|)|<|<=|==|>|>=|
 
 规范族 43 : 
-Factor_loop->Factor_loop · Factor *  (|identifier|num|
 Item->Factor_loop · Factor  !=|)|+|-|<|<=|==|>|>=|
+Factor_loop->Factor_loop · Factor *  (|identifier|num|
 Factor_loop->Factor_loop · Factor /  (|identifier|num|
-Factor->· Const_value  !=|)|*|+|-|/|<|<=|==|>|>=|
 Factor->· identifier FTYPE  !=|)|*|+|-|/|<|<=|==|>|>=|
 Factor->· ( Expression )  !=|)|*|+|-|/|<|<=|==|>|>=|
+Factor->· Const_value  !=|)|*|+|-|/|<|<=|==|>|>=|
 Const_value->· num  !=|)|*|+|-|/|<|<=|==|>|>=|
 
 规范族 44 : 
@@ -213,19 +213,19 @@ Factor_loop->Factor_loop Factor · /  (|identifier|num|
 Factor_loop->Factor_loop Factor · *  (|identifier|num|
 
 规范族 45 : 
-Factor->Const_value · !=|)|*|+|-|/|<|<=|==|>|>=|
-
-规范族 46 : 
-FTYPE->· Call_func  !=|)|*|+|-|/|<|<=|==|>|>=|
-Factor->identifier · FTYPE  !=|)|*|+|-|/|<|<=|==|>|>=|
 FTYPE->·
+Factor->identifier · FTYPE  !=|)|*|+|-|/|<|<=|==|>|>=|
+FTYPE->· Call_func  !=|)|*|+|-|/|<|<=|==|>|>=|
 Call_func->· ( Call_func_check Actual_parameter_list )  !=|)|*|+|-|/|<|<=|==|>|>=|
 
-规范族 47 : 
-Add_expression_loop->· Add_expression_loop Add_expression Relop  (|identifier|num|
-Expression->· Add_expression_loop Add_expression  )|
+规范族 46 : 
 Add_expression_loop->·
+Expression->· Add_expression_loop Add_expression  )|
+Add_expression_loop->· Add_expression_loop Add_expression Relop  (|identifier|num|
 Factor->( · Expression )  !=|)|*|+|-|/|<|<=|==|>|>=|
+
+规范族 47 : 
+Factor->Const_value · !=|)|*|+|-|/|<|<=|==|>|>=|
 
 规范族 48 : 
 Const_value->num · !=|)|*|+|-|/|<|<=|==|>|>=|
@@ -237,10 +237,10 @@ Factor->( Expression · )  !=|)|*|+|-|/|<|<=|==|>|>=|
 Factor->( Expression ) · !=|)|*|+|-|/|<|<=|==|>|>=|
 
 规范族 51 : 
-FTYPE->Call_func · !=|)|*|+|-|/|<|<=|==|>|>=|
+Factor->identifier FTYPE · !=|)|*|+|-|/|<|<=|==|>|>=|
 
 规范族 52 : 
-Factor->identifier FTYPE · !=|)|*|+|-|/|<|<=|==|>|>=|
+FTYPE->Call_func · !=|)|*|+|-|/|<|<=|==|>|>=|
 
 规范族 53 : 
 Call_func->( · Call_func_check Actual_parameter_list )  !=|)|*|+|-|/|<|<=|==|>|>=|
@@ -249,66 +249,66 @@ Call_func_check->·
 规范族 54 : 
 Call_func->( Call_func_check · Actual_parameter_list )  !=|)|*|+|-|/|<|<=|==|>|>=|
 Expression_loop->· Expression_loop Expression ,  (|identifier|num|
-Actual_parameter_list->·
 Actual_parameter_list->· Expression_loop Expression  )|
 Expression_loop->·
+Actual_parameter_list->·
 
 规范族 55 : 
 Call_func->( Call_func_check Actual_parameter_list · )  !=|)|*|+|-|/|<|<=|==|>|>=|
 
 规范族 56 : 
-Add_expression_loop->· Add_expression_loop Add_expression Relop  (|identifier|num|
-Expression->· Add_expression_loop Add_expression  )|,|
 Add_expression_loop->·
-Expression_loop->Expression_loop · Expression ,  (|identifier|num|
+Expression->· Add_expression_loop Add_expression  )|,|
+Add_expression_loop->· Add_expression_loop Add_expression Relop  (|identifier|num|
 Actual_parameter_list->Expression_loop · Expression  )|
+Expression_loop->Expression_loop · Expression ,  (|identifier|num|
 
 规范族 57 : 
 Expression->Add_expression_loop · Add_expression  )|,|
 Add_expression_loop->Add_expression_loop · Add_expression Relop  (|identifier|num|
-Item_loop->·
+Item_loop->· Item_loop Item +  (|identifier|num|
 Add_expression->· Item_loop Item  !=|)|,|<|<=|==|>|>=|
 Item_loop->· Item_loop Item -  (|identifier|num|
-Item_loop->· Item_loop Item +  (|identifier|num|
+Item_loop->·
 
 规范族 58 : 
-Expression_loop->Expression_loop Expression · ,  (|identifier|num|
 Actual_parameter_list->Expression_loop Expression · )|
+Expression_loop->Expression_loop Expression · ,  (|identifier|num|
 
 规范族 59 : 
 Expression_loop->Expression_loop Expression , · (|identifier|num|
 
 规范族 60 : 
 Expression->Add_expression_loop Add_expression · )|,|
-Add_expression_loop->Add_expression_loop Add_expression · Relop  (|identifier|num|
-Relop->· !=  (|identifier|num|
-Relop->· ==  (|identifier|num|
 Relop->· >  (|identifier|num|
 Relop->· >=  (|identifier|num|
 Relop->· <=  (|identifier|num|
 Relop->· <  (|identifier|num|
+Relop->· ==  (|identifier|num|
+Add_expression_loop->Add_expression_loop Add_expression · Relop  (|identifier|num|
+Relop->· !=  (|identifier|num|
 
 规范族 61 : 
-Add_expression->Item_loop · Item  !=|)|,|<|<=|==|>|>=|
+Factor_loop->·
 Item_loop->Item_loop · Item +  (|identifier|num|
+Factor_loop->· Factor_loop Factor *  (|identifier|num|
+Add_expression->Item_loop · Item  !=|)|,|<|<=|==|>|>=|
 Item_loop->Item_loop · Item -  (|identifier|num|
 Item->· Factor_loop Factor  !=|)|+|,|-|<|<=|==|>|>=|
-Factor_loop->·
-Factor_loop->· Factor_loop Factor *  (|identifier|num|
 Factor_loop->· Factor_loop Factor /  (|identifier|num|
 
 规范族 62 : 
+Add_expression->Item_loop Item · !=|)|,|<|<=|==|>|>=|
 Item_loop->Item_loop Item · +  (|identifier|num|
 Item_loop->Item_loop Item · -  (|identifier|num|
-Add_expression->Item_loop Item · !=|)|,|<|<=|==|>|>=|
 
 规范族 63 : 
-Factor_loop->Factor_loop · Factor *  (|identifier|num|
 Item->Factor_loop · Factor  !=|)|+|,|-|<|<=|==|>|>=|
+Factor_loop->Factor_loop · Factor *  (|identifier|num|
 Factor_loop->Factor_loop · Factor /  (|identifier|num|
-Factor->· Const_value  !=|)|*|+|,|-|/|<|<=|==|>|>=|
 Factor->· identifier FTYPE  !=|)|*|+|,|-|/|<|<=|==|>|>=|
 Factor->· ( Expression )  !=|)|*|+|,|-|/|<|<=|==|>|>=|
+Factor->· Const_value  !=|)|*|+|,|-|/|<|<=|==|>|>=|
 Const_value->· num  !=|)|*|+|,|-|/|<|<=|==|>|>=|
 
 规范族 64 : 
@@ -317,19 +317,19 @@ Factor_loop->Factor_loop Factor · /  (|identifier|num|
 Factor_loop->Factor_loop Factor · *  (|identifier|num|
 
 规范族 65 : 
-Factor->Const_value · !=|)|*|+|,|-|/|<|<=|==|>|>=|
-
-规范族 66 : 
-FTYPE->· Call_func  !=|)|*|+|,|-|/|<|<=|==|>|>=|
-Factor->identifier · FTYPE  !=|)|*|+|,|-|/|<|<=|==|>|>=|
 FTYPE->·
+Factor->identifier · FTYPE  !=|)|*|+|,|-|/|<|<=|==|>|>=|
+FTYPE->· Call_func  !=|)|*|+|,|-|/|<|<=|==|>|>=|
 Call_func->· ( Call_func_check Actual_parameter_list )  !=|)|*|+|,|-|/|<|<=|==|>|>=|
 
-规范族 67 : 
-Add_expression_loop->· Add_expression_loop Add_expression Relop  (|identifier|num|
-Expression->· Add_expression_loop Add_expression  )|
+规范族 66 : 
 Add_expression_loop->·
+Expression->· Add_expression_loop Add_expression  )|
+Add_expression_loop->· Add_expression_loop Add_expression Relop  (|identifier|num|
 Factor->( · Expression )  !=|)|*|+|,|-|/|<|<=|==|>|>=|
+
+规范族 67 : 
+Factor->Const_value · !=|)|*|+|,|-|/|<|<=|==|>|>=|
 
 规范族 68 : 
 Const_value->num · !=|)|*|+|,|-|/|<|<=|==|>|>=|
@@ -341,10 +341,10 @@ Factor->( Expression · )  !=|)|*|+|,|-|/|<|<=|==|>|>=|
 Factor->( Expression ) · !=|)|*|+|,|-|/|<|<=|==|>|>=|
 
 规范族 71 : 
-FTYPE->Call_func · !=|)|*|+|,|-|/|<|<=|==|>|>=|
+Factor->identifier FTYPE · !=|)|*|+|,|-|/|<|<=|==|>|>=|
 
 规范族 72 : 
-Factor->identifier FTYPE · !=|)|*|+|,|-|/|<|<=|==|>|>=|
+FTYPE->Call_func · !=|)|*|+|,|-|/|<|<=|==|>|>=|
 
 规范族 73 : 
 Call_func->( · Call_func_check Actual_parameter_list )  !=|)|*|+|,|-|/|<|<=|==|>|>=|
@@ -353,9 +353,9 @@ Call_func_check->·
 规范族 74 : 
 Call_func->( Call_func_check · Actual_parameter_list )  !=|)|*|+|,|-|/|<|<=|==|>|>=|
 Expression_loop->· Expression_loop Expression ,  (|identifier|num|
-Actual_parameter_list->·
 Actual_parameter_list->· Expression_loop Expression  )|
 Expression_loop->·
+Actual_parameter_list->·
 
 规范族 75 : 
 Call_func->( Call_func_check Actual_parameter_list · )  !=|)|*|+|,|-|/|<|<=|==|>|>=|
@@ -376,25 +376,25 @@ Item_loop->Item_loop Item + · (|identifier|num|
 Item_loop->Item_loop Item - · (|identifier|num|
 
 规范族 81 : 
-Add_expression_loop->Add_expression_loop Add_expression Relop · (|identifier|num|
-
-规范族 82 : 
-Relop->!= · (|identifier|num|
-
-规范族 83 : 
-Relop->== · (|identifier|num|
-
-规范族 84 : 
 Relop->> · (|identifier|num|
 
-规范族 85 : 
+规范族 82 : 
 Relop->>= · (|identifier|num|
 
-规范族 86 : 
+规范族 83 : 
 Relop-><= · (|identifier|num|
 
-规范族 87 : 
+规范族 84 : 
 Relop->< · (|identifier|num|
+
+规范族 85 : 
+Relop->== · (|identifier|num|
+
+规范族 86 : 
+Add_expression_loop->Add_expression_loop Add_expression Relop · (|identifier|num|
+
+规范族 87 : 
+Relop->!= · (|identifier|num|
 
 规范族 88 : 
 If_sentence->if If_sentence_m0 ( Expression ) · If_sentence_m1 Sentence_block If_expression  identifier|if|return|while|}|
@@ -409,8 +409,8 @@ If_sentence->if If_sentence_m0 ( Expression ) If_sentence_m1 · Sentence_block I
 Sentence_block->Sentence_block_m · { Internal_stmt Sentence_string }  $|else|identifier|if|return|while|}|
 
 规范族 91 : 
-If_expression->· If_sentence_n else Sentence_block  identifier|if|return|while|}|
 If_expression->·
+If_expression->· If_sentence_n else Sentence_block  identifier|if|return|while|}|
 If_sentence->if If_sentence_m0 ( Expression ) If_sentence_m1 Sentence_block · If_expression  identifier|if|return|while|}|
 If_sentence_n->·
 
@@ -431,13 +431,13 @@ If_expression->If_sentence_n else Sentence_block · identifier|if|return|while|}
 规范族 96 : 
 Internal_variable_stmt->· int identifier  ;|
 Sentence_block->Sentence_block_m { · Internal_stmt Sentence_string }  $|else|identifier|if|return|while|}|
-Internal_stmt->·
 Internal_stmt->· Internal_variable_stmt ; Internal_stmt  identifier|if|return|while|
+Internal_stmt->·
 
 规范族 97 : 
+Sentence_block->Sentence_block_m { Internal_stmt · Sentence_string }  $|else|identifier|if|return|while|}|
 Sentence_string->· Sentence_loop Sentence  }|
 Sentence_loop->· Sentence_loop Sentence  identifier|if|return|while|
-Sentence_block->Sentence_block_m { Internal_stmt · Sentence_string }  $|else|identifier|if|return|while|}|
 Sentence_loop->·
 
 规范族 98 : 
@@ -447,53 +447,50 @@ Sentence_block->Sentence_block_m { Internal_stmt Sentence_string · }  $|else|id
 Sentence_block->Sentence_block_m { Internal_stmt Sentence_string } · $|else|identifier|if|return|while|}|
 
 规范族 100 : 
-Assign_sentence->identifier = · Expression ;  identifier|if|return|while|}|
-Add_expression_loop->· Add_expression_loop Add_expression Relop  (|identifier|num|
-Expression->· Add_expression_loop Add_expression  ;|
-Add_expression_loop->·
+Return_sentence->return Return_expression · ;  identifier|if|return|while|}|
 
 规范族 101 : 
-Assign_sentence->identifier = Expression · ;  identifier|if|return|while|}|
+Return_expression->Expression · ;|
 
 规范族 102 : 
 Expression->Add_expression_loop · Add_expression  ;|
 Add_expression_loop->Add_expression_loop · Add_expression Relop  (|identifier|num|
-Item_loop->·
+Item_loop->· Item_loop Item +  (|identifier|num|
 Add_expression->· Item_loop Item  !=|;|<|<=|==|>|>=|
 Item_loop->· Item_loop Item -  (|identifier|num|
-Item_loop->· Item_loop Item +  (|identifier|num|
+Item_loop->·
 
 规范族 103 : 
 Expression->Add_expression_loop Add_expression · ;|
-Add_expression_loop->Add_expression_loop Add_expression · Relop  (|identifier|num|
-Relop->· !=  (|identifier|num|
-Relop->· ==  (|identifier|num|
 Relop->· >  (|identifier|num|
 Relop->· >=  (|identifier|num|
 Relop->· <=  (|identifier|num|
 Relop->· <  (|identifier|num|
+Relop->· ==  (|identifier|num|
+Add_expression_loop->Add_expression_loop Add_expression · Relop  (|identifier|num|
+Relop->· !=  (|identifier|num|
 
 规范族 104 : 
-Add_expression->Item_loop · Item  !=|;|<|<=|==|>|>=|
+Factor_loop->·
 Item_loop->Item_loop · Item +  (|identifier|num|
+Factor_loop->· Factor_loop Factor *  (|identifier|num|
+Add_expression->Item_loop · Item  !=|;|<|<=|==|>|>=|
 Item_loop->Item_loop · Item -  (|identifier|num|
 Item->· Factor_loop Factor  !=|+|-|;|<|<=|==|>|>=|
-Factor_loop->·
-Factor_loop->· Factor_loop Factor *  (|identifier|num|
 Factor_loop->· Factor_loop Factor /  (|identifier|num|
 
 规范族 105 : 
+Add_expression->Item_loop Item · !=|;|<|<=|==|>|>=|
 Item_loop->Item_loop Item · +  (|identifier|num|
 Item_loop->Item_loop Item · -  (|identifier|num|
-Add_expression->Item_loop Item · !=|;|<|<=|==|>|>=|
 
 规范族 106 : 
-Factor_loop->Factor_loop · Factor *  (|identifier|num|
 Item->Factor_loop · Factor  !=|+|-|;|<|<=|==|>|>=|
+Factor_loop->Factor_loop · Factor *  (|identifier|num|
 Factor_loop->Factor_loop · Factor /  (|identifier|num|
-Factor->· Const_value  !=|*|+|-|/|;|<|<=|==|>|>=|
 Factor->· identifier FTYPE  !=|*|+|-|/|;|<|<=|==|>|>=|
 Factor->· ( Expression )  !=|*|+|-|/|;|<|<=|==|>|>=|
+Factor->· Const_value  !=|*|+|-|/|;|<|<=|==|>|>=|
 Const_value->· num  !=|*|+|-|/|;|<|<=|==|>|>=|
 
 规范族 107 : 
@@ -502,19 +499,19 @@ Factor_loop->Factor_loop Factor · /  (|identifier|num|
 Factor_loop->Factor_loop Factor · *  (|identifier|num|
 
 规范族 108 : 
-Factor->Const_value · !=|*|+|-|/|;|<|<=|==|>|>=|
-
-规范族 109 : 
-FTYPE->· Call_func  !=|*|+|-|/|;|<|<=|==|>|>=|
-Factor->identifier · FTYPE  !=|*|+|-|/|;|<|<=|==|>|>=|
 FTYPE->·
+Factor->identifier · FTYPE  !=|*|+|-|/|;|<|<=|==|>|>=|
+FTYPE->· Call_func  !=|*|+|-|/|;|<|<=|==|>|>=|
 Call_func->· ( Call_func_check Actual_parameter_list )  !=|*|+|-|/|;|<|<=|==|>|>=|
 
-规范族 110 : 
-Add_expression_loop->· Add_expression_loop Add_expression Relop  (|identifier|num|
-Expression->· Add_expression_loop Add_expression  )|
+规范族 109 : 
 Add_expression_loop->·
+Expression->· Add_expression_loop Add_expression  )|
+Add_expression_loop->· Add_expression_loop Add_expression Relop  (|identifier|num|
 Factor->( · Expression )  !=|*|+|-|/|;|<|<=|==|>|>=|
+
+规范族 110 : 
+Factor->Const_value · !=|*|+|-|/|;|<|<=|==|>|>=|
 
 规范族 111 : 
 Const_value->num · !=|*|+|-|/|;|<|<=|==|>|>=|
@@ -526,10 +523,10 @@ Factor->( Expression · )  !=|*|+|-|/|;|<|<=|==|>|>=|
 Factor->( Expression ) · !=|*|+|-|/|;|<|<=|==|>|>=|
 
 规范族 114 : 
-FTYPE->Call_func · !=|*|+|-|/|;|<|<=|==|>|>=|
+Factor->identifier FTYPE · !=|*|+|-|/|;|<|<=|==|>|>=|
 
 规范族 115 : 
-Factor->identifier FTYPE · !=|*|+|-|/|;|<|<=|==|>|>=|
+FTYPE->Call_func · !=|*|+|-|/|;|<|<=|==|>|>=|
 
 规范族 116 : 
 Call_func->( · Call_func_check Actual_parameter_list )  !=|*|+|-|/|;|<|<=|==|>|>=|
@@ -538,9 +535,9 @@ Call_func_check->·
 规范族 117 : 
 Call_func->( Call_func_check · Actual_parameter_list )  !=|*|+|-|/|;|<|<=|==|>|>=|
 Expression_loop->· Expression_loop Expression ,  (|identifier|num|
-Actual_parameter_list->·
 Actual_parameter_list->· Expression_loop Expression  )|
 Expression_loop->·
+Actual_parameter_list->·
 
 规范族 118 : 
 Call_func->( Call_func_check Actual_parameter_list · )  !=|*|+|-|/|;|<|<=|==|>|>=|
@@ -549,25 +546,28 @@ Call_func->( Call_func_check Actual_parameter_list · )  !=|*|+|-|/|;|<|<=|==|>|
 Call_func->( Call_func_check Actual_parameter_list ) · !=|*|+|-|/|;|<|<=|==|>|>=|
 
 规范族 120 : 
-Assign_sentence->identifier = Expression ; · identifier|if|return|while|}|
+Return_sentence->return Return_expression ; · identifier|if|return|while|}|
 
 规范族 121 : 
-Return_expression->Expression · ;|
+Assign_sentence->identifier = · Expression ;  identifier|if|return|while|}|
+Add_expression_loop->·
+Expression->· Add_expression_loop Add_expression  ;|
+Add_expression_loop->· Add_expression_loop Add_expression Relop  (|identifier|num|
 
 规范族 122 : 
-Return_sentence->return Return_expression · ;  identifier|if|return|while|}|
+Assign_sentence->identifier = Expression · ;  identifier|if|return|while|}|
 
 规范族 123 : 
-Return_sentence->return Return_expression ; · identifier|if|return|while|}|
+Assign_sentence->identifier = Expression ; · identifier|if|return|while|}|
 
 规范族 124 : 
 While_sentence->while While_sentence_m1 · ( Expression ) While_sentence_m2 Sentence_block  identifier|if|return|while|}|
 
 规范族 125 : 
 While_sentence->while While_sentence_m1 ( · Expression ) While_sentence_m2 Sentence_block  identifier|if|return|while|}|
-Add_expression_loop->· Add_expression_loop Add_expression Relop  (|identifier|num|
-Expression->· Add_expression_loop Add_expression  )|
 Add_expression_loop->·
+Expression->· Add_expression_loop Add_expression  )|
+Add_expression_loop->· Add_expression_loop Add_expression Relop  (|identifier|num|
 
 规范族 126 : 
 While_sentence->while While_sentence_m1 ( Expression · ) While_sentence_m2 Sentence_block  identifier|if|return|while|}|
@@ -585,43 +585,43 @@ While_sentence->while While_sentence_m1 ( Expression ) While_sentence_m2 · Sent
 While_sentence->while While_sentence_m1 ( Expression ) While_sentence_m2 Sentence_block · identifier|if|return|while|}|
 
 规范族 130 : 
-Internal_variable_stmt->int identifier · ;|
+Sentence_block->Sentence_block_m { Internal_stmt Sentence_string } · #|$|int|void|
 
 规范族 131 : 
-Function_stmt->( Formal_parameter ) Sentence_block Exit_Function_table · #|int|void|
+Internal_variable_stmt->int identifier · ;|
 
 规范族 132 : 
+Parameter->int · identifier  )|,|
+
+规范族 133 : 
 Formal_parameter_list->Parameter_loop Parameter · )|
 Parameter_loop->Parameter_loop Parameter · ,  int|
 
-规范族 133 : 
-Parameter->int · identifier  )|,|
-
 规范族 134 : 
-Parameter->int identifier · )|,|
+Parameter_loop->Parameter_loop Parameter , · int|
 
 规范族 135 : 
-Parameter_loop->Parameter_loop Parameter , · int|
+Parameter->int identifier · )|,|
 
 规范族 136 : 
 Stmt->int identifier · Stmt_type  #|int|void|
-Create_Function_table->·
-Variavle_stmt->· ;  #|int|void|
 Stmt_type->· Variavle_stmt  #|int|void|
 Stmt_type->· Create_Function_table Function_stmt  #|int|void|
+Variavle_stmt->· ;  #|int|void|
+Create_Function_table->·
 
 规范族 137 : 
 Stmt->int identifier Stmt_type · #|int|void|
 
 规范族 138 : 
-Variavle_stmt->; · #|int|void|
-
-规范族 139 : 
 Stmt_type->Variavle_stmt · #|int|void|
 
-规范族 140 : 
-Stmt_type->Create_Function_table · Function_stmt  #|int|void|
+规范族 139 : 
 Function_stmt->· ( Formal_parameter ) Sentence_block Exit_Function_table  #|int|void|
+Stmt_type->Create_Function_table · Function_stmt  #|int|void|
+
+规范族 140 : 
+Variavle_stmt->; · #|int|void|
 
 规范族 141 : 
 Stmt_type->Create_Function_table Function_stmt · #|int|void|
