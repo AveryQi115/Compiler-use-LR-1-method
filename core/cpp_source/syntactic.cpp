@@ -528,7 +528,7 @@ bool Syntactic::_genNormalFamilySet()
         {
             const LRItem* lr_item = iter1->LRpointer;
             //如果该表达式是空串或规约
-            if (-1 == lr_item->dot_pos || (_prods[lr_item->prod_id].right.size() == lr_item->dot_pos))
+            if (lr_item->dot_pos==-1 ||(_prods[lr_item->prod_id].right.size() == lr_item->dot_pos))
             {
                 //sym: 表达式左部
                 std::string sym = _prods[lr_item->prod_id].left;
@@ -536,7 +536,6 @@ bool Syntactic::_genNormalFamilySet()
                 //遍历表达式iter1的展望，并按照展望规约
                 for (auto iter2 = iter1->forward.begin(); iter2 != iter1->forward.end(); ++iter2)
                 {
-
                     if (_action_goto_map.find({cur_state, *iter2}) == _action_goto_map.end())
                     {
                         _action_goto_map.insert({{cur_state, *iter2}, {CONCLUDE, lr_item->prod_id}});
@@ -617,7 +616,7 @@ bool Syntactic::_genNormalFamilySet()
         if (cur_state2 >= 0)
             break;
     }
-    std::set<LRItem> item = {LRItem(0, 1)};
+    //std::set<LRItem> item = {LRItem(0, 1)};
 
     _action_goto_map[{cur_state2, "#"}] = {ACCEPT, cur_state2};
 
@@ -1200,7 +1199,6 @@ bool Syntactic::analyze(const std::string code_path, bool skip_parse)
                 _move_con_stack.push_back(word_string);
                 _printProcess(sytactic_step, _action_goto_map[{cur_state, word_string}]);
                 sytactic_step++;
-                //语义分析用
                 _gram_sym_stack.push_back({get_word.word_string, get_word.val});
 
                 break;

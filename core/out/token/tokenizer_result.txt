@@ -135,4 +135,7 @@ step 134 , type: BOARDER , value: (
 step 135 , type: IDENTIFIER , value: c
 step 136 , type: BOARDER , value: )
 step 137 , type: BOARDER , value: )
-step 138 , type: KEYWARD , value: return
+step 138 , type: BOARDER , value: ;
+step 139 , type: KEYWARD , value: return
+step 140 , type: BOARDER , value: ;
+step 141 , type: BOARDER , value: }
